@@ -8,5 +8,6 @@
       "connection": "meoqueues_STORAGE"
     }
   ],
+  "scriptFile": "process.deployment.request.ps1",
   "disabled": false
 }

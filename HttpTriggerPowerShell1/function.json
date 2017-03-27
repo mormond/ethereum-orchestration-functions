@@ -19,5 +19,6 @@
       "direction": "out"
     }
   ],
+  "scriptFile" : "schedule.deployment.ps1",
   "disabled": false
 }
