@@ -2,8 +2,8 @@
 # 
 #
 
-$in = Get-Content $triggerInput
-Write-Output "PowerShell script processed queue message '$in'"
+$payload = Get-Content $triggerInput -Raw | ConvertFrom-Json
+#Write-Output "PowerShell script processed queue message '$payload'"
 
 Set-Variable contentRoot "https://raw.githubusercontent.com/mormond" -Option Constant
 Set-Variable ethereumArmTemplates "ethereum-arm-templates" -Option Constant
@@ -27,27 +27,14 @@ function CreateNewResourceGroup($rgName, $location) {
     New-AzureRmResourceGroup -Location $location -Name $rgName -Force
 }
 
-function CaptureRequestParameters() {
-    $requestBody = Get-Content $req -Raw | ConvertFrom-Json
 
-    $props = @{
-        location = $requestBody.location
-        rgName = $requestBody.rgName
-        dashboardIp = $requestBody.dashboardIp
-        subName = $requestBody.subName
-        templateParamsUri = $requestBody.templateParamsUri
-    }
-    return new-object psobject -Property $props
-}
-
-$requestParams = CaptureRequestParameters
 
 $login = AuthenticateWithAzure $ENV:SP_AppID $ENV:SP_Tenant $ENV:SP_Secret
 
-SetAzureSubscription $requestParams.subName
-CreateNewResourceGroup $requestParams.rgName $requestParams.location
+SetAzureSubscription $payload.subName
+CreateNewResourceGroup $payload.rgName $payload.location -Focce
 
-Write-Output $requestParams.dashboardIp
+Write-Output $payload.dashboardIp
 
 #
 # Need to pull the params file locally due to this issue: https://github.com/Azure/azure-powershell/issues/2414 
@@ -56,21 +43,21 @@ Write-Output $requestParams.dashboardIp
 $paramsFile = "D:\Local\Temp\template.consortium.params.participant1.json"
 
 Invoke-WebRequest -UseBasicParsing `
-    -Uri $requestParams.templateParamsUri `
+    -Uri $payload.templateParamsUri `
     -OutFile $paramsFile -Verbose
 
 Write-Output "Params File Downloaded"
 
 Write-Output "Starting Deployment"
 
-$ethOutputs = New-AzureRmResourceGroupDeployment `
-    -TemplateUri "$contentRoot/$ethereumArmTemplates/master/ethereum-consortium/template.consortiumMember.json" `
-    -TemplateParameterFile $paramsFile `
-    -ResourceGroupName $requestParams.rgName `
-    -dashboardIp $requestParams.dashboardIp `
-    -registrarIp $requestParams.dashboardIp 
+    $ethOutputs = New-AzureRmResourceGroupDeployment `
+        -TemplateUri "$contentRoot/$ethereumArmTemplates/master/ethereum-consortium/template.consortiumMember.json" `
+        -TemplateParameterFile $paramsFile `
+        -ResourceGroupName $payload.rgName `
+        -dashboardIp $payload.dashboardIp `
+        -registrarIp $payload.dashboardIp 
 
-    $consortiumMemberName = $ethOutputs.Parameters.consortiumMemberName.value
-    $vnetName = "$consortiumMemberName-vnet"
+        $consortiumMemberName = $ethOutputs.Parameters.consortiumMemberName.value
+        $vnetName = "$consortiumMemberName-vnet"
 
-Out-File -Encoding Ascii -FilePath $res -inputObject $ethOutputs
+Out-File -Encoding Ascii -FilePath $res -inputObject "Done" $ethOutputs

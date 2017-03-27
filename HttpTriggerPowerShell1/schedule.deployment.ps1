@@ -1,24 +1,28 @@
 #
-# No idea whether this will work or not - can't find any documentaiton
-# on using PS with a queue output
+# Take a JSON payload in the following format to kick off a new member deployment
+# {
+#    "id"                   : "An ID for the request to allow it to be tracked for it's lifetime",
+#    "location"             : "An azure location for the deployment",
+#    "rgName"               : "Resource group name",
+#    "dashboardIp"          : "IP Address of the registrar node",
+#    "subName"              : "Azure Subscription Name",
+#    "templateParamsUri"    : "A link to the ARM template parameters file for the deployment"
+# }
 #
 
-$requestBody = Get-Content $req -Raw | ConvertFrom-Json
-$name = $requestBody.name
-
-Write-Output "Testing Write Output Works"
-
-if ($name) 
-{
-    Write-Output "In conditional"
-
-    $guid = [guid]::NewGuid()
-
-    $outItem = $guid.Guid, $name
-
-    $outItem | % {Write-Output $_}
-
-    Out-File -Encoding Ascii -FilePath $outputQueueItem -inputObject $outItem    
-    Out-File -Encoding Ascii -FilePath $res -inputObject $outItem
+function ExtendJsonObject($originalObject, $propName, $propValue) {
+    Add-Member -InputObject $originalObject Timestamp ((Get-Date).ToString())  
+    return $originalObject
 }
+
+$payload = Get-Content $req -Raw | ConvertFrom-Json
+$queueMessageObject = ExtendJsonObject $payload Timestamp ((Get-Date).ToString())
+$queueMessageJson = $queueMessage | ConvertTo-Json
+
+#Write-Output "Testing Write Output Works"
+
+#$queueMessage | % {Write-Output $_}
+
+Out-File -Encoding Ascii -FilePath $outputQueueItem -inputObject $queueMessageJson    
+Out-File -Encoding Ascii -FilePath $res -inputObject $queueMessageJson
 
