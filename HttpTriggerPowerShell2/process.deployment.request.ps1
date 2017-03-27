@@ -2,6 +2,9 @@
 # 
 #
 
+$in = Get-Content $triggerInput
+Write-Output "PowerShell script processed queue message '$in'"
+
 Set-Variable contentRoot "https://raw.githubusercontent.com/mormond" -Option Constant
 Set-Variable ethereumArmTemplates "ethereum-arm-templates" -Option Constant
 Set-Variable ethereumDevVm "ethereum-dev-vm" -Option Constant

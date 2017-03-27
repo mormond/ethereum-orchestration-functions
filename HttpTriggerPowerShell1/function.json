@@ -10,7 +10,14 @@
       "name": "res",
       "type": "http",
       "direction": "out"
+    },
+    {
+      "type": "queue",
+      "name": "outputQueueItem",
+      "queueName": "scheduled-deployments",
+      "connection": "meoqueues_STORAGE",
+      "direction": "out"
     }
   ],
-  "disabled": true
+  "disabled": false
 }
