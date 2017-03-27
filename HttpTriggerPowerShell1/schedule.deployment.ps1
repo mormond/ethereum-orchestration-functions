@@ -17,7 +17,7 @@ function ExtendJsonObject($originalObject, $propName, $propValue) {
 
 $payload = Get-Content $req -Raw | ConvertFrom-Json
 $queueMessageObject = ExtendJsonObject $payload Timestamp ((Get-Date).ToString())
-$queueMessageJson = $queueMessage | ConvertTo-Json
+$queueMessageJson = $queueMessageObject | ConvertTo-Json
 
 #Write-Output "Testing Write Output Works"
 
