@@ -5,7 +5,7 @@
       "type": "queueTrigger",
       "direction": "in",
       "queueName": "scheduled-deployments",
-      "connection": "meoqueues_STORAGE"
+      "connection": "StorageConnection"
     }
   ],
   "scriptFile": "process.deployment.request.ps1",

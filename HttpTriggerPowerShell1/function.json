@@ -15,7 +15,7 @@
       "type": "queue",
       "name": "outputQueueItem",
       "queueName": "scheduled-deployments",
-      "connection": "meoqueues_STORAGE",
+      "connection": "StorageConnection",
       "direction": "out"
     }
   ],
